@@ -5,7 +5,8 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Grids;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Grids,
+  ExtCtrls;
 
 type
 
@@ -14,9 +15,11 @@ type
   TForm1 = class(TForm)
     StringGrid1: TStringGrid;
     procedure FormCreate(Sender: TObject);
+    procedure StringGrid1DblClick(Sender: TObject);
     procedure StringGrid1DrawCell(Sender: TObject; aCol, aRow: Integer;
       aRect: TRect; aState: TGridDrawState);
     procedure StringGrid1EditingDone(Sender: TObject);
+    procedure reWritePrices();
   private
     { private declarations }
   public
@@ -50,6 +53,7 @@ var i,j: integer;
     cena_temp: string;
 begin
   DecimalSeparator := '.';
+  StringGrid1.Options := StringGrid1.Options - [goEditing];
 
   StringGrid1.Cells[0,0] := 'Kod';
   StringGrid1.Cells[1,0] := 'Tovar';
@@ -163,23 +167,55 @@ begin
           end;
 end;
 
+procedure TForm1.StringGrid1DblClick(Sender: TObject);
+begin
+  IF (StringGrid1.Row > 0) AND (StringGrid1.Col > 1)
+     THEN StringGrid1.Options := StringGrid1.Options + [goEditing];
+end;
+
 procedure TForm1.StringGrid1DrawCell(Sender: TObject; aCol, aRow: Integer;
   aRect: TRect; aState: TGridDrawState);
-var i: integer;
+var i,j: integer;
 begin
-  for i := 1 to x do
-      IF cena[i].nak = 0
-         THEN begin
-                aRow := i;
-                StringGrid1.Canvas.Brush.Color := clRed;
-                StringGrid1.Canvas.FillRect(aRect);
-                StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
-              end;
+            IF ((cena[aRow-1].nak = 0) OR (cena[aRow-1].pred = 0)) AND (aRow <> 0)
+               THEN begin
+                      //aRow := i;
+                      //aCol := j;
+                      StringGrid1.Canvas.Brush.Color := clRed;
+                      StringGrid1.Canvas.FillRect(aRect);
+                      StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
+                    end
+                    ELSE begin
+                           StringGrid1.Canvas.Brush.Color := clGray;
+                           StringGrid1.Canvas.FillRect(aRect);
+                           StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
+                         end;
 end;
 
 procedure TForm1.StringGrid1EditingDone(Sender: TObject);
 begin
-  ShowMessage('YAAAAAAAS');
+  //ShowMessage('YAAAAAAS');
+  IF StringGrid1.Col = 2
+     THEN cena[StringGrid1.Row].nak := StrToFloat(StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row])
+          ELSE IF StringGrid1.Col = 3
+                  THEN cena[StringGrid1.Row].pred := StrToFloat(StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row]);
+  //@TForm1.StringGrid1DrawCell;
+  StringGrid1.Options := StringGrid1.Options - [goEditing];
+  reWritePrices();
+end;
+
+procedure TForm1.reWritePrices();
+var i: integer;
+begin
+  ReWrite(cennik);
+  WriteLn(cennik,x);
+  for i := 1 to x do
+      begin
+        WriteLn(cennik,IntToStr(cena[i].kod)+';'+FloatToStr(cena[i].nak)+';'+FloatToStr(cena[i].pred));
+        //StringGrid1.Cells[2,i] := FloatToStr(cena[i].nak);
+        //StringGrid1.Cells[3,i] := FloatToStr(cena[i].pred);
+      end;
+  CloseFile(cennik);
 end;
 
 end.

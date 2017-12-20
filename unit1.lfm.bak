@@ -12,13 +12,14 @@ object Form1: TForm1
     Left = 24
     Height = 272
     Top = 96
-    Width = 192
+    Width = 256
     ColCount = 4
     ColumnClickSorts = True
     FixedCols = 0
     Flat = True
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goSmoothScroll]
     TabOrder = 0
+    OnDblClick = StringGrid1DblClick
     OnDrawCell = StringGrid1DrawCell
     OnEditingDone = StringGrid1EditingDone
   end
