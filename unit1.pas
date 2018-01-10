@@ -6,16 +6,18 @@ interface
 
 uses
   LCLType, Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Grids,
-  ExtCtrls, StdCtrls;
+  ExtCtrls, StdCtrls, Buttons;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
+    BitBtn1: TBitBtn;
     Edit1: TEdit;
     StringGrid1: TStringGrid;
     ToggleBox1: TToggleBox;
+    procedure BitBtn1Click(Sender: TObject);
     procedure Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
@@ -193,6 +195,11 @@ begin
           end;
 end;
 
+procedure TForm1.BitBtn1Click(Sender: TObject);
+begin
+
+end;
+
 procedure TForm1.StringGrid1DblClick(Sender: TObject);
 begin
      IF (StringGrid1.Row > 0) AND (StringGrid1.Col > 1)
@@ -216,7 +223,7 @@ begin
                                    StringGrid1.Canvas.Brush.Color := clGray;
                                    StringGrid1.Canvas.FillRect(aRect);
                                    StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
-                         end;
+                                 end;
 end;
 
 procedure TForm1.StringGrid1EditingDone(Sender: TObject);

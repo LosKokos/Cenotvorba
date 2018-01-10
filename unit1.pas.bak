@@ -211,10 +211,11 @@ begin
                       StringGrid1.Canvas.FillRect(aRect);
                       StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
                     end
-                    ELSE begin
-                           StringGrid1.Canvas.Brush.Color := clGray;
-                           StringGrid1.Canvas.FillRect(aRect);
-                           StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
+                    ELSE IF aRow <> 0
+                            THEN begin
+                                   StringGrid1.Canvas.Brush.Color := clGray;
+                                   StringGrid1.Canvas.FillRect(aRect);
+                                   StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
                          end;
 end;
 
