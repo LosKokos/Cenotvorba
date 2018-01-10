@@ -15,13 +15,16 @@ object Form1: TForm1
     Width = 256
     ColCount = 4
     ColumnClickSorts = True
+    FixedColor = 14941668
     FixedCols = 0
     Flat = True
+    MouseWheelOption = mwGrid
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goSmoothScroll]
     TabOrder = 0
     OnDblClick = StringGrid1DblClick
     OnDrawCell = StringGrid1DrawCell
     OnEditingDone = StringGrid1EditingDone
+    OnSelectCell = StringGrid1SelectCell
   end
   object ToggleBox1: TToggleBox
     Left = 56
@@ -31,5 +34,13 @@ object Form1: TForm1
     Caption = 'Enable Sort'
     OnChange = ToggleBox1Change
     TabOrder = 1
+  end
+  object Edit1: TEdit
+    Left = 56
+    Height = 23
+    Top = 24
+    Width = 80
+    OnKeyDown = Edit1KeyDown
+    TabOrder = 2
   end
 end

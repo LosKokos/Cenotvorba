@@ -5,7 +5,7 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Grids,
+  LCLType, Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Grids,
   ExtCtrls, StdCtrls;
 
 type
@@ -13,14 +13,18 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    Edit1: TEdit;
     StringGrid1: TStringGrid;
     ToggleBox1: TToggleBox;
+    procedure Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
     procedure StringGrid1DrawCell(Sender: TObject; aCol, aRow: Integer;
       aRect: TRect; aState: TGridDrawState);
     procedure StringGrid1EditingDone(Sender: TObject);
     procedure reWritePrices();
+    procedure StringGrid1SelectCell(Sender: TObject; aCol, aRow: Integer;
+      var CanSelect: Boolean);
     procedure ToggleBox1Change(Sender: TObject);
   private
     { private declarations }
@@ -54,7 +58,7 @@ var i,j: integer;
     kod_temp: string;
     cena_temp: string;
 begin
-  DecimalSeparator := ',';
+  DecimalSeparator := '.';
   StringGrid1.Options := StringGrid1.Options - [goEditing];
   StringGrid1.ColumnClickSorts := false;
 
@@ -66,7 +70,7 @@ begin
   StringGrid1.ColWidths[1] := 200;
   StringGrid1.ColWidths[2] := 100;
   StringGrid1.ColWidths[3] := 100;
-  StringGrid1.Width := StringGrid1.ColWidths[0] + StringGrid1.ColWidths[1] + StringGrid1.ColWidths[2] + StringGrid1.ColWidths[3];
+  StringGrid1.Width := StringGrid1.ColWidths[0] + StringGrid1.ColWidths[1] + StringGrid1.ColWidths[2] + StringGrid1.ColWidths[3] + 18;
 
   AssignFile(tovar,'TOVAR.txt');
   Reset(tovar);
@@ -171,6 +175,24 @@ begin
           end;
 end;
 
+procedure TForm1.Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
+  );
+var i: integer;
+begin
+  IF Key = VK_RETURN
+     THEN begin
+            for i := 1 to x do
+                IF Edit1.Text = cena[i].nazov
+                   THEN begin
+                          StringGrid1.Row := i;
+                          StringGrid1.Col := 2;
+                          //StringGrid1.OnSelectCell(self,i,2,true);
+                          StringGrid1.SetFocus;
+                          //StringGrid1.SelectedIndex := [i,2];
+                        end;
+          end;
+end;
+
 procedure TForm1.StringGrid1DblClick(Sender: TObject);
 begin
      IF (StringGrid1.Row > 0) AND (StringGrid1.Col > 1)
@@ -189,10 +211,11 @@ begin
                       StringGrid1.Canvas.FillRect(aRect);
                       StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
                     end
-                    ELSE begin
-                           StringGrid1.Canvas.Brush.Color := clGray;
-                           StringGrid1.Canvas.FillRect(aRect);
-                           StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
+                    ELSE IF aRow <> 0
+                            THEN begin
+                                   StringGrid1.Canvas.Brush.Color := clGray;
+                                   StringGrid1.Canvas.FillRect(aRect);
+                                   StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
                          end;
 end;
 
@@ -220,6 +243,12 @@ begin
         //StringGrid1.Cells[3,i] := FloatToStr(cena[i].pred);
       end;
   CloseFile(cennik);
+end;
+
+procedure TForm1.StringGrid1SelectCell(Sender: TObject; aCol, aRow: Integer;
+  var CanSelect: Boolean);
+begin
+
 end;
 
 procedure TForm1.ToggleBox1Change(Sender: TObject);
