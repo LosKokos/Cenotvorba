@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Grids,
-  ExtCtrls;
+  ExtCtrls, StdCtrls;
 
 type
 
@@ -14,12 +14,14 @@ type
 
   TForm1 = class(TForm)
     StringGrid1: TStringGrid;
+    ToggleBox1: TToggleBox;
     procedure FormCreate(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
     procedure StringGrid1DrawCell(Sender: TObject; aCol, aRow: Integer;
       aRect: TRect; aState: TGridDrawState);
     procedure StringGrid1EditingDone(Sender: TObject);
     procedure reWritePrices();
+    procedure ToggleBox1Change(Sender: TObject);
   private
     { private declarations }
   public
@@ -52,8 +54,9 @@ var i,j: integer;
     kod_temp: string;
     cena_temp: string;
 begin
-  DecimalSeparator := '.';
+  DecimalSeparator := ',';
   StringGrid1.Options := StringGrid1.Options - [goEditing];
+  StringGrid1.ColumnClickSorts := false;
 
   StringGrid1.Cells[0,0] := 'Kod';
   StringGrid1.Cells[1,0] := 'Tovar';
@@ -169,15 +172,15 @@ end;
 
 procedure TForm1.StringGrid1DblClick(Sender: TObject);
 begin
-  IF (StringGrid1.Row > 0) AND (StringGrid1.Col > 1)
-     THEN StringGrid1.Options := StringGrid1.Options + [goEditing];
+     IF (StringGrid1.Row > 0) AND (StringGrid1.Col > 1)
+        THEN StringGrid1.Options := StringGrid1.Options + [goEditing];
 end;
 
 procedure TForm1.StringGrid1DrawCell(Sender: TObject; aCol, aRow: Integer;
   aRect: TRect; aState: TGridDrawState);
 var i,j: integer;
 begin
-            IF ((cena[aRow-1].nak = 0) OR (cena[aRow-1].pred = 0)) AND (aRow <> 0)
+            IF ((cena[aRow].nak = 0) OR (cena[aRow].pred = 0)) AND (aRow <> 0)
                THEN begin
                       //aRow := i;
                       //aCol := j;
@@ -216,6 +219,13 @@ begin
         //StringGrid1.Cells[3,i] := FloatToStr(cena[i].pred);
       end;
   CloseFile(cennik);
+end;
+
+procedure TForm1.ToggleBox1Change(Sender: TObject);
+begin
+  IF ToggleBox1.Checked = true
+     THEN StringGrid1.ColumnClickSorts := true
+          ELSE StringGrid1.ColumnClickSorts := false;
 end;
 
 end.

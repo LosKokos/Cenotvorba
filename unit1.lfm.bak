@@ -9,9 +9,9 @@ object Form1: TForm1
   OnCreate = FormCreate
   LCLVersion = '1.6.4.0'
   object StringGrid1: TStringGrid
-    Left = 24
+    Left = 56
     Height = 272
-    Top = 96
+    Top = 64
     Width = 256
     ColCount = 4
     ColumnClickSorts = True
@@ -22,5 +22,14 @@ object Form1: TForm1
     OnDblClick = StringGrid1DblClick
     OnDrawCell = StringGrid1DrawCell
     OnEditingDone = StringGrid1EditingDone
+  end
+  object ToggleBox1: TToggleBox
+    Left = 56
+    Height = 23
+    Top = 344
+    Width = 90
+    Caption = 'Enable Sort'
+    OnChange = ToggleBox1Change
+    TabOrder = 1
   end
 end
