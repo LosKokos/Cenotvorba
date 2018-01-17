@@ -13,11 +13,11 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
     Edit1: TEdit;
+    Label1: TLabel;
     StringGrid1: TStringGrid;
-    ToggleBox1: TToggleBox;
-    procedure BitBtn1Click(Sender: TObject);
+    procedure BitBtn2Click(Sender: TObject);
     procedure Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
@@ -27,7 +27,6 @@ type
     procedure reWritePrices();
     procedure StringGrid1SelectCell(Sender: TObject; aCol, aRow: Integer;
       var CanSelect: Boolean);
-    procedure ToggleBox1Change(Sender: TObject);
   private
     { private declarations }
   public
@@ -48,6 +47,7 @@ var
   cennik: TextFile;
   cena: array of ceny;
   x,xc: integer;
+  path: string;
 implementation
 
 {$R *.lfm}
@@ -62,7 +62,11 @@ var i,j: integer;
 begin
   DecimalSeparator := '.';
   StringGrid1.Options := StringGrid1.Options - [goEditing];
-  StringGrid1.ColumnClickSorts := false;
+  //StringGrid1.ColumnClickSorts := false;
+  path := '';
+  StringGrid1.SelectedColor:=clHighlight;
+  //StringGrid1.Options := StringGrid1.Options - [goDrawFocusSelected];
+
 
   StringGrid1.Cells[0,0] := 'Kod';
   StringGrid1.Cells[1,0] := 'Tovar';
@@ -74,7 +78,7 @@ begin
   StringGrid1.ColWidths[3] := 100;
   StringGrid1.Width := StringGrid1.ColWidths[0] + StringGrid1.ColWidths[1] + StringGrid1.ColWidths[2] + StringGrid1.ColWidths[3] + 18;
 
-  AssignFile(tovar,'TOVAR.txt');
+  AssignFile(tovar,path+'TOVAR.txt');
   Reset(tovar);
   ReadLn(tovar,x);
   SetLength(cena,x+1);
@@ -102,9 +106,9 @@ begin
       end;
   CloseFile(tovar);
 
-  IF NOT FileExists('CENNIK.txt')
+  IF NOT FileExists(path+'CENNIK.txt')
      THEN begin
-                 AssignFile(cennik,'CENNIK.txt');
+                 AssignFile(cennik,path+'CENNIK.txt');
                  ReWrite(cennik);
                  WriteLn(cennik,'0');
                  for i := 1 to x do
@@ -118,7 +122,7 @@ begin
                  CloseFile(cennik);
                end
           ELSE begin
-                 AssignFile(cennik,'CENNIK.txt');
+                 AssignFile(cennik,path+'CENNIK.txt');
                  Reset(cennik);
                  ReadLn(cennik,xc);
                  for i := 1 to xc do
@@ -181,10 +185,11 @@ procedure TForm1.Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
   );
 var i: integer;
 begin
+  StringGrid1.Options := StringGrid1.Options + [goDrawFocusSelected];
   IF Key = VK_RETURN
      THEN begin
             for i := 1 to x do
-                IF Edit1.Text = cena[i].nazov
+                IF UpperCase(Edit1.Text) = UpperCase(cena[i].nazov)
                    THEN begin
                           StringGrid1.Row := i;
                           StringGrid1.Col := 2;
@@ -193,11 +198,20 @@ begin
                           //StringGrid1.SelectedIndex := [i,2];
                         end;
           end;
+  StringGrid1.Options := StringGrid1.Options - [goDrawFocusSelected];
 end;
 
-procedure TForm1.BitBtn1Click(Sender: TObject);
+procedure TForm1.BitBtn2Click(Sender: TObject);
 begin
-
+  for i := 1 to x do
+      IF UpperCase(Edit1.Text) = UpperCase(cena[i].nazov)
+         THEN begin
+                StringGrid1.Row := i;
+                StringGrid1.Col := 2;
+                //StringGrid1.OnSelectCell(self,i,2,true);
+                StringGrid1.SetFocus;
+                //StringGrid1.SelectedIndex := [i,2];
+              end;
 end;
 
 procedure TForm1.StringGrid1DblClick(Sender: TObject);
@@ -218,12 +232,12 @@ begin
                       StringGrid1.Canvas.FillRect(aRect);
                       StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
                     end
-                    ELSE IF aRow <> 0
+                    {ELSE IF aRow <> 0
                             THEN begin
-                                   StringGrid1.Canvas.Brush.Color := clGray;
+                                   StringGrid1.Canvas.Brush.Color := clWhite;
                                    StringGrid1.Canvas.FillRect(aRect);
                                    StringGrid1.Canvas.TextRect(aRect,aRect.Left,aRect.top,StringGrid1.Cells[aCol,aRow]);
-                                 end;
+                                 end;}
 end;
 
 procedure TForm1.StringGrid1EditingDone(Sender: TObject);
@@ -256,13 +270,6 @@ procedure TForm1.StringGrid1SelectCell(Sender: TObject; aCol, aRow: Integer;
   var CanSelect: Boolean);
 begin
 
-end;
-
-procedure TForm1.ToggleBox1Change(Sender: TObject);
-begin
-  IF ToggleBox1.Checked = true
-     THEN StringGrid1.ColumnClickSorts := true
-          ELSE StringGrid1.ColumnClickSorts := false;
 end;
 
 end.
