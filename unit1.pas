@@ -17,6 +17,8 @@ type
     Edit1: TEdit;
     Label1: TLabel;
     StringGrid1: TStringGrid;
+    Timer1: TTimer;
+    Timer2: TTimer;
     procedure BitBtn2Click(Sender: TObject);
     procedure Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
@@ -25,8 +27,12 @@ type
       aRect: TRect; aState: TGridDrawState);
     procedure StringGrid1EditingDone(Sender: TObject);
     procedure reWritePrices();
+    procedure StringGrid1KeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     procedure StringGrid1SelectCell(Sender: TObject; aCol, aRow: Integer;
       var CanSelect: Boolean);
+    procedure Timer1Timer(Sender: TObject);
+    procedure Timer2Timer(Sender: TObject);
   private
     { private declarations }
   public
@@ -48,6 +54,7 @@ var
   cena: array of ceny;
   x,xc: integer;
   path: string;
+  bun_temp: string;
 implementation
 
 {$R *.lfm}
@@ -59,14 +66,16 @@ var i,j: integer;
     c: char;
     kod_temp: string;
     cena_temp: string;
+    bul: boolean;
 begin
   DecimalSeparator := '.';
   StringGrid1.Options := StringGrid1.Options - [goEditing];
   //StringGrid1.ColumnClickSorts := false;
+  //path := '\\comenius\public\market\tima\';
   path := '';
   StringGrid1.SelectedColor:=clHighlight;
   //StringGrid1.Options := StringGrid1.Options - [goDrawFocusSelected];
-
+  bul := false;
 
   StringGrid1.Cells[0,0] := 'Kod';
   StringGrid1.Cells[1,0] := 'Tovar';
@@ -78,6 +87,13 @@ begin
   StringGrid1.ColWidths[3] := 100;
   StringGrid1.Width := StringGrid1.ColWidths[0] + StringGrid1.ColWidths[1] + StringGrid1.ColWidths[2] + StringGrid1.ColWidths[3] + 18;
 
+  bul := true;
+  IF NOT FileExists(path+'TOVAR.txt')
+     THEN
+  repeat
+    ShowMessage('Upsie Daisy');
+    //Sleep(500);
+  until FileExists(path+'TOVAR.txt');
   AssignFile(tovar,path+'TOVAR.txt');
   Reset(tovar);
   ReadLn(tovar,x);
@@ -179,6 +195,7 @@ begin
 
             CloseFile(cennik);
           end;
+  Timer1.Enabled := true;
 end;
 
 procedure TForm1.Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
@@ -202,6 +219,7 @@ begin
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
+var i: integer;
 begin
   for i := 1 to x do
       IF UpperCase(Edit1.Text) = UpperCase(cena[i].nazov)
@@ -218,6 +236,7 @@ procedure TForm1.StringGrid1DblClick(Sender: TObject);
 begin
      IF (StringGrid1.Row > 0) AND (StringGrid1.Col > 1)
         THEN StringGrid1.Options := StringGrid1.Options + [goEditing];
+     bun_temp := StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row];
 end;
 
 procedure TForm1.StringGrid1DrawCell(Sender: TObject; aCol, aRow: Integer;
@@ -241,8 +260,17 @@ begin
 end;
 
 procedure TForm1.StringGrid1EditingDone(Sender: TObject);
+var i: integer;
+    bod: boolean;
+    good: boolean;
+    bun: string;
+    val: double;
 begin
+  bod := false;
+  good := true;
+
   //ShowMessage('YAAAAAAS');
+  {try
   IF StringGrid1.Col = 2
      THEN cena[StringGrid1.Row].nak := StrToFloat(StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row])
           ELSE IF StringGrid1.Col = 3
@@ -250,6 +278,45 @@ begin
   //@TForm1.StringGrid1DrawCell;
   StringGrid1.Options := StringGrid1.Options - [goEditing];
   reWritePrices();
+  except
+    on E: EConvertError do
+       ShowMessage('Upsie daisy');
+  end}
+
+
+  {bun := StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row];
+  IF (bun[1] in ['0'..'9']) AND (bun[length(bun)] in ['0'..'9'])
+     THEN for i := 2 to Length(bun)-1 do
+          begin
+               IF ((bun[i] = '.') AND (bod = false))
+                  THEN bod := true
+                       ELSE IF NOT (bun[i] in ['0'..'9'])
+                                 THEN begin
+                                        good := false;
+                                        //break;
+                                      end;
+          end
+          ELSE good := false;
+  IF good = true
+     THEN reWritePrices()
+          ELSE begin
+                 ShowMessage('!!!');
+                 StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row] := bun_temp;
+               end;}
+  StringGrid1.Options := StringGrid1.Options - [goEditing];
+  IF TryStrToFloat(StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row], val)
+     THEN begin
+            IF StringGrid1.Col = 2
+               THEN cena[StringGrid1.Row].nak := StrToFloat(StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row])
+                    ELSE IF StringGrid1.Col = 3
+                            THEN cena[StringGrid1.Row].pred := StrToFloat(StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row]);
+            //reWritePrices();
+            Timer2.Enabled := true;
+          end
+          ELSE begin
+                 StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row] := bun_temp;
+                 ShowMessage('Ayyyy Caramba');
+               end;
 end;
 
 procedure TForm1.reWritePrices();
@@ -266,10 +333,95 @@ begin
   CloseFile(cennik);
 end;
 
+procedure TForm1.StringGrid1KeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+
+end;
+
 procedure TForm1.StringGrid1SelectCell(Sender: TObject; aCol, aRow: Integer;
   var CanSelect: Boolean);
 begin
 
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+var i,j,x2,f: integer;
+    c: char;
+    kod_temp: string;
+    cena_temp: string;
+begin
+  //AssignFile(tovar,path+'TOVAR.txt');
+  IF NOT FileExists(path+'TOVAR_LOCK.txt')
+     THEN begin
+  f := FileCreate(path+'TOVAR_LOCK.txt');
+  Reset(tovar);
+  ReadLn(tovar,x2);
+  SetLength(cena,x2+1);
+  StringGrid1.RowCount := x2+1;
+  //for i := 1 to x2 do
+      //ReadLn(tovar);
+  for i := 1 to x2 do
+      begin
+        Read(tovar,c);
+        repeat
+          IF c in ['0'..'9']
+             THEN kod_temp := kod_temp + c;
+          Read(tovar,c);
+        until c = ';';
+        cena[i].kod := StrToInt(kod_temp);
+        StringGrid1.Cells[0,i] := kod_temp;
+
+        //Read(tovar,c);
+        cena[i].nazov := '';
+        repeat
+          Read(tovar,c);
+          cena[i].nazov := cena[i].nazov + c;
+        until EoLn(tovar);
+
+        StringGrid1.Cells[1,i] := cena[i].nazov;
+
+        kod_temp := '';
+      end;
+  CloseFile(tovar);
+
+  IF x2 - x > 0
+     THEN begin
+  for i := x+1 to x2 do
+                IF cena[i].nak = null
+                   THEN begin
+                          cena[i].nak := 0;
+                          cena[i].pred := 0;
+                        end;
+            ReWrite(cennik);
+            WriteLn(cennik,x2);
+            for i := 1 to x2 do
+                begin
+                  WriteLn(cennik,IntToStr(cena[i].kod)+';'+FloatToStr(cena[i].nak)+';'+FloatToStr(cena[i].pred));
+                  StringGrid1.Cells[2,i] := FloatToStr(cena[i].nak);
+                  StringGrid1.Cells[3,i] := FloatToStr(cena[i].pred);
+                end;
+
+            CloseFile(cennik);
+  x := x2;
+     end;
+  FileClose(f);
+  DeleteFile(path+'TOVAR_LOCK.txt');
+end;
+end;
+
+procedure TForm1.Timer2Timer(Sender: TObject);
+var f: integer;
+begin
+  IF NOT FileExists(path+'CENNIK_LOCK.txt')
+     THEN begin
+            f := FileCreate(path+'CENNIK_LOCK.txt');
+            reWritePrices();
+            FileClose(f);
+            DeleteFile(path+'CENNIK_LOCK.txt');
+            Timer2.Enabled := false;
+          end
+          ELSE ShowMessage('Waiting...');
 end;
 
 end.

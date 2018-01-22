@@ -1,11 +1,11 @@
 object Form1: TForm1
   Left = 1131
-  Height = 475
+  Height = 374
   Top = 128
-  Width = 563
+  Width = 564
   Caption = 'Form1'
-  ClientHeight = 475
-  ClientWidth = 563
+  ClientHeight = 374
+  ClientWidth = 564
   Color = clMoneyGreen
   OnCreate = FormCreate
   LCLVersion = '1.6.4.0'
@@ -29,6 +29,7 @@ object Form1: TForm1
     OnDblClick = StringGrid1DblClick
     OnDrawCell = StringGrid1DrawCell
     OnEditingDone = StringGrid1EditingDone
+    OnKeyDown = StringGrid1KeyDown
     OnSelectCell = StringGrid1SelectCell
   end
   object Edit1: TEdit
@@ -154,5 +155,18 @@ object Form1: TForm1
     }
     OnClick = BitBtn2Click
     TabOrder = 2
+  end
+  object Timer1: TTimer
+    Enabled = False
+    OnTimer = Timer1Timer
+    left = 351
+    top = 32
+  end
+  object Timer2: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = Timer2Timer
+    left = 421
+    top = 40
   end
 end
