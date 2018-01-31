@@ -1,14 +1,14 @@
 object Form1: TForm1
-  Left = 1131
+  Left = 627
   Height = 374
-  Top = 128
+  Top = 301
   Width = 564
   Caption = 'Form1'
   ClientHeight = 374
   ClientWidth = 564
   Color = clMoneyGreen
   OnCreate = FormCreate
-  LCLVersion = '1.6.4.0'
+  LCLVersion = '1.4.0.4'
   object StringGrid1: TStringGrid
     Left = 56
     Height = 264
@@ -16,7 +16,6 @@ object Form1: TForm1
     Width = 256
     Color = clWhite
     ColCount = 4
-    ColumnClickSorts = True
     ExtendedSelect = False
     FixedColor = 14941668
     FixedCols = 0
@@ -37,6 +36,7 @@ object Form1: TForm1
     Height = 23
     Top = 24
     Width = 80
+    OnChange = Edit1Change
     OnKeyDown = Edit1KeyDown
     TabOrder = 1
   end
@@ -167,6 +167,6 @@ object Form1: TForm1
     Interval = 100
     OnTimer = Timer2Timer
     left = 421
-    top = 40
+    top = 32
   end
 end

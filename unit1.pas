@@ -20,6 +20,7 @@ type
     Timer1: TTimer;
     Timer2: TTimer;
     procedure BitBtn2Click(Sender: TObject);
+    procedure Edit1Change(Sender: TObject);
     procedure Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
@@ -67,12 +68,13 @@ var i,j: integer;
     kod_temp: string;
     cena_temp: string;
     bul: boolean;
+    m: boolean;
 begin
   DecimalSeparator := '.';
   StringGrid1.Options := StringGrid1.Options - [goEditing];
   //StringGrid1.ColumnClickSorts := false;
-  //path := '\\comenius\public\market\tima\';
-  path := '';
+  path := '\\comenius\public\market\tima\';
+  //path := '';
   StringGrid1.SelectedColor:=clHighlight;
   //StringGrid1.Options := StringGrid1.Options - [goDrawFocusSelected];
   bul := false;
@@ -91,7 +93,7 @@ begin
   IF NOT FileExists(path+'TOVAR.txt')
      THEN
   repeat
-    ShowMessage('Upsie Daisy');
+    ShowMessage('Čakám...');
     //Sleep(500);
   until FileExists(path+'TOVAR.txt');
   AssignFile(tovar,path+'TOVAR.txt');
@@ -137,7 +139,8 @@ begin
                      end;
                  CloseFile(cennik);
                end
-          ELSE begin
+          ELSE IF NOT FileExists(path+'CENNIK_LOCK.txt')
+               THEN begin
                  AssignFile(cennik,path+'CENNIK.txt');
                  Reset(cennik);
                  ReadLn(cennik,xc);
@@ -194,7 +197,16 @@ begin
                 end;
 
             CloseFile(cennik);
-          end;
+            m := false;
+          end
+             ELSE begin
+                    m := true;
+                    IF m = true
+                       THEN begin
+                              ShowMessage('Čakám..');
+                              m := false;
+                            end;
+                  end;
   Timer1.Enabled := true;
 end;
 
@@ -230,6 +242,11 @@ begin
                 StringGrid1.SetFocus;
                 //StringGrid1.SelectedIndex := [i,2];
               end;
+end;
+
+procedure TForm1.Edit1Change(Sender: TObject);
+begin
+
 end;
 
 procedure TForm1.StringGrid1DblClick(Sender: TObject);
@@ -304,6 +321,11 @@ begin
                  StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row] := bun_temp;
                end;}
   StringGrid1.Options := StringGrid1.Options - [goEditing];
+  bun := StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row];
+  IF bun[1] = '.'
+     THEN StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row] := '0' + bun;
+  IF bun[length(bun)] = '.'
+     THEN StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row] := bun + '0';
   IF TryStrToFloat(StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row], val)
      THEN begin
             IF StringGrid1.Col = 2
@@ -315,7 +337,7 @@ begin
           end
           ELSE begin
                  StringGrid1.Cells[StringGrid1.Col,StringGrid1.Row] := bun_temp;
-                 ShowMessage('Ayyyy Caramba');
+                 ShowMessage('Neplatná cena');
                end;
 end;
 
@@ -400,7 +422,7 @@ begin
                   WriteLn(cennik,IntToStr(cena[i].kod)+';'+FloatToStr(cena[i].nak)+';'+FloatToStr(cena[i].pred));
                   StringGrid1.Cells[2,i] := FloatToStr(cena[i].nak);
                   StringGrid1.Cells[3,i] := FloatToStr(cena[i].pred);
-                end;
+               end;
 
             CloseFile(cennik);
   x := x2;
@@ -412,16 +434,25 @@ end;
 
 procedure TForm1.Timer2Timer(Sender: TObject);
 var f: integer;
+    m: boolean;
 begin
   IF NOT FileExists(path+'CENNIK_LOCK.txt')
      THEN begin
+            m := false;
             f := FileCreate(path+'CENNIK_LOCK.txt');
             reWritePrices();
             FileClose(f);
             DeleteFile(path+'CENNIK_LOCK.txt');
             Timer2.Enabled := false;
           end
-          ELSE ShowMessage('Waiting...');
+          ELSE begin
+               m := true;
+               IF m = true
+                  THEN begin
+                         ShowMessage('Čakám..');
+                         m := false;
+                       end;
+               end;
 end;
 
 end.
